@@ -71,6 +71,10 @@ func (c *client) validateUsers(userKeys map[string]string) error {
 			delete(userKeys, user)
 		}
 	}
+
+	if len(userKeys) < 1 {
+		return fmt.Errorf("You need to have at least one valid key in %v", *keysURI)
+	}
 	return nil
 }
 
