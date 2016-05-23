@@ -2,20 +2,20 @@ package main
 
 import (
 	"fmt"
-	"github.com/jawher/mow.cli"
 	"github.com/nmcclain/ldap"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 )
 
 var (
-	keysURI      *string
-	ldapServer   *string
-	ldapPort     *int
-	ldapUser     *string
-	ldapPassword *string
+	keysURI      = os.Getenv("KEYS_URI")
+	ldapServer   = os.Getenv("LDAP_SERVER")
+	ldapPort     = os.Getenv("LDAP_PORT")
+	ldapUser     = os.Getenv("LDAP_USER")
+	ldapPassword = os.Getenv("LDAP_PASSWORD")
 
 	httpClient *http.Client
 )
@@ -26,7 +26,7 @@ type client struct {
 }
 
 func (c client) keys() (keys string, err error) {
-	resp, err := c.httpClient.Get(*keysURI)
+	resp, err := c.httpClient.Get(keysURI)
 
 	if err != nil {
 		return "", err
@@ -73,7 +73,7 @@ func (c *client) validateUsers(userKeys map[string]string) error {
 	}
 
 	if len(userKeys) < 1 {
-		return fmt.Errorf("You need to have at least one valid key in %v", *keysURI)
+		return fmt.Errorf("You need to have at least one valid key in %v", keysURI)
 	}
 	return nil
 }
@@ -107,13 +107,13 @@ func (c *client) userActive(user string) bool {
 }
 
 func (c *client) connectLDAP() (err error) {
-	con, err := ldap.Dial("tcp", fmt.Sprintf("%s:%d", *ldapServer, *ldapPort))
+	con, err := ldap.Dial("tcp", fmt.Sprintf("%s:%d", ldapServer, ldapPort))
 	if err != nil {
 		log.Printf("dial err: %v", err)
 		return err
 	}
 
-	err = con.Bind(*ldapUser, *ldapPassword)
+	err = con.Bind(ldapUser, ldapPassword)
 	if err != nil {
 		log.Printf("bind err: %v", err)
 		return err
@@ -144,38 +144,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	app := cli.App("ssh-ad-key-validator", "Exposes public ssh keys of AD active users.")
-	keysURI = app.String(cli.StringOpt{
-		Name:   "keysURI",
-		Value:  "",
-		Desc:   "URI of the public ssh keys",
-		EnvVar: "KEYS_URI",
-	})
-	ldapServer = app.String(cli.StringOpt{
-		Name:   "ldapServer",
-		Value:  "",
-		Desc:   "ldap server address",
-		EnvVar: "LDAP_SERVER",
-	})
-	ldapPort = app.Int(cli.IntOpt{
-		Name:   "ldapPort",
-		Value:  0,
-		Desc:   "ldap server port",
-		EnvVar: "LDAP_PORT",
-	})
-	ldapUser = app.String(cli.StringOpt{
-		Name:   "ldapUser",
-		Value:  "",
-		Desc:   "ldap login username",
-		EnvVar: "LDAP_USER",
-	})
-	ldapPassword = app.String(cli.StringOpt{
-		Name:   "ldapPassword",
-		Value:  "",
-		Desc:   "ldap login password",
-		EnvVar: "LDAP_PASSWORD",
-	})
-
 	httpClient = &http.Client{Transport: &http.Transport{MaxIdleConnsPerHost: 25}}
 
 	http.HandleFunc("/authorized_keys", handler)
