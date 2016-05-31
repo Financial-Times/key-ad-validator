@@ -6,6 +6,7 @@ variable "ldap_user"{}
 variable "ldap_server"{}
 variable "ldap_port"{}
 variable "keys_uri"{}
+variable "deploy_user"{}
 
 # Remote state file
 resource "terraform_remote_state" "state_file" {
@@ -50,4 +51,24 @@ resource "aws_instance" "key-ad-validator" {
 		teamDL = "universal.publishing.platform@ft.com"
 		stopSchedule = "nostop"
 	}
+	# The connection block tells our provisioner how to
+	# communicate with the resource (instance)
+	connection {
+		# Connect to private IP, 22 blocked for public
+		host = "${self.private_ip}"
+		# AD username to deploy the artifact
+		user = "${var.deploy_user}"
+		# Timeout after 5 minutes
+		timeout = "5m"
+
+		# The connection will use the local SSH agent for authentication.
+	}
+
+	provisioner "remote-exec" {
+  		inline = [
+  			"sudo yum install -y docker",
+  			"sudo service docker start",
+			"sudo docker run -p 80:8080 --rm coco/key-ad-validator"
+  		]
+  	}
 }
