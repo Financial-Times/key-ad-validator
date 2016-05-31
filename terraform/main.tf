@@ -6,7 +6,16 @@ variable "ldap_user"{}
 variable "ldap_server"{}
 variable "ldap_port"{}
 variable "keys_uri"{}
-variable "deploy_user"{}
+
+# Remote state file
+resource "terraform_remote_state" "state_file" {
+	backend = "s3"
+	config {
+		bucket = "ft.terraform.state-files"
+		key = "coco-key-ad-valid-svc/terraform.tfstate"
+		region = "eu-west-1"
+	}
+}
 
 # Userdata
 resource "template_file" "userdata" {
@@ -33,7 +42,7 @@ resource "aws_instance" "key-ad-validator" {
 		volume_size = 10
 	}
 	tags {
-		Name = "Key AD Validator service"
+		Name = "CoCo Key AD Validator Service"
 		environment = "p"
 		ipCode = "P196"
 		systemCode = "Universal-Publishing"
