@@ -68,7 +68,13 @@ resource "aws_instance" "key-ad-validator" {
   		inline = [
   			"sudo yum install -y docker",
   			"sudo service docker start",
-			"sudo docker run -p 80:8080 --rm coco/key-ad-validator"
+			"sudo docker kill key-ad-validator || echo Not running",
+			"export KEYS_URI=${var.keys_uri}",
+			"export LDAP_SERVER=${var.ldap_server}",
+			"export LDAP_PORT=${var.ldap_port}",
+			"export LDAP_USER=${var.ldap_user}",
+			"export LDAP_PASSWORD=${var.ldap_password}",
+			"sudo docker run -d -p 80:8080 --name key-ad-validator coco/key-ad-validator"
   		]
   	}
 }
