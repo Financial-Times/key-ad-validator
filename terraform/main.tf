@@ -21,13 +21,6 @@ resource "terraform_remote_state" "state_file" {
 # Userdata
 resource "template_file" "userdata" {
 	template = "${file("userdata.tpl")}"
-	vars {
-	        ldap_password = "${var.ldap_password}"
-	        ldap_user = "${var.ldap_user}"
-	        ldap_server = "${var.ldap_server}"
-	        ldap_port = "${var.ldap_port}"
-	        keys_uri = "${var.keys_uri}"
-	}
 }
 
 # Create a server
