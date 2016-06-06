@@ -16,7 +16,7 @@ export AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 export TF_VAR_keys_uri=https://raw.githubusercontent.com/Financial-Times/up-ssh-keys/master/authorized_keys
 export TF_VAR_ldap_server=ldap.server.com
 export TF_VAR_ldap_port=389
-export TF_VAR_ldap_user=tyler.durden
+export TF_VAR_ldap_user='CN=Durden\\, Tyler,OU=...,DC=...'
 export TF_VAR_ldap_password=uniquesnowflake
 ```
 
